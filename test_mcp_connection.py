@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test de conexión directa al servidor MCP
+Direct connection test to MCP server
 """
 
 import asyncio
@@ -11,14 +11,14 @@ import time
 import os
 
 async def test_mcp_server():
-    """Probar el servidor MCP directamente"""
+    """Test the MCP server directly"""
     
-    print("🔍 Iniciando test del servidor MCP...")
+    print("🔍 Starting MCP server test...")
     
-    # Cambiar al directorio del servidor
+    # Change to server directory
     os.chdir('/home/fciliberti/Trabajos/Cronopia/sites/bosk/tools/gutenberg-extractor')
     
-    # Iniciar el servidor MCP como proceso
+    # Start the MCP server as a process
     process = await asyncio.create_subprocess_exec(
         sys.executable, 'mcp_server.py', '--stdio',
         stdin=asyncio.subprocess.PIPE,
@@ -28,7 +28,7 @@ async def test_mcp_server():
     
     try:
         # Test 1: Initialize
-        print("📤 Enviando initialize...")
+        print("📤 Sending initialize...")
         initialize_request = {
             'jsonrpc': '2.0',
             'id': 1,
@@ -47,10 +47,10 @@ async def test_mcp_server():
             response = json.loads(stdout.decode().strip())
             print(f"✅ Initialize response: {json.dumps(response, indent=2)}")
         else:
-            print(f"❌ No response para initialize. Stderr: {stderr.decode()}")
+            print(f"❌ No response for initialize. Stderr: {stderr.decode()}")
         
         # Test 2: Tools/list
-        print("\n📤 Enviando tools/list...")
+        print("\n📤 Sending tools/list...")
         tools_request = {
             'jsonrpc': '2.0', 
             'id': 2,
@@ -64,20 +64,20 @@ async def test_mcp_server():
             response = json.loads(stdout.decode().strip())
             print(f"✅ Tools/list response: {json.dumps(response, indent=2)}")
             
-            # Verificar que las herramientas están presentes
+            # Verify that tools are present
             tools = response.get('result', {}).get('tools', [])
             if tools:
-                print(f"🎯 Herramientas encontradas: {len(tools)}")
+                print(f"🎯 Tools found: {len(tools)}")
                 for tool in tools:
                     print(f"  - {tool.get('name', 'Unknown')}: {tool.get('description', 'No description')}")
             else:
-                print("❌ No se encontraron herramientas")
+                print("❌ No tools found")
                 
         else:
-            print(f"❌ No response para tools/list. Stderr: {stderr.decode()}")
+            print(f"❌ No response for tools/list. Stderr: {stderr.decode()}")
             
-        # Test 3: List supported types (herramienta específica)
-        print("\n📤 Enviando tools/call list_supported_types...")
+        # Test 3: List supported types (specific tool)
+        print("\n📤 Sending tools/call list_supported_types...")
         tools_call_request = {
             'jsonrpc': '2.0',
             'id': 3,
@@ -95,13 +95,13 @@ async def test_mcp_server():
             response = json.loads(stdout.decode().strip())
             print(f"✅ List supported types response: {json.dumps(response, indent=2)}")
         else:
-            print(f"❌ No response para list_supported_types. Stderr: {stderr.decode()}")
+            print(f"❌ No response for list_supported_types. Stderr: {stderr.decode()}")
             
     except Exception as e:
-        print(f"❌ Error durante el test: {e}")
+        print(f"❌ Error during test: {e}")
         
     finally:
-        # Cerrar el proceso
+        # Close the process
         process.terminate()
         await process.wait()
 

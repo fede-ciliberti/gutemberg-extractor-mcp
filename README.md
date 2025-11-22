@@ -1,38 +1,38 @@
-# Gutenberg Extractor MCP Server - Documentación Completa
+# Gutenberg Extractor MCP Server - Complete Documentation
 
-## Descripción
+## Description
 
-Servidor MCP (Model Context Protocol) para extraer recursos embebidos en archivos Gutenberg. Cumplimiento completo del protocolo MCP 2024-11-05.
+MCP (Model Context Protocol) server for extracting embedded resources from Gutenberg files. Full compliance with MCP protocol 2024-11-05.
 
-## Características
+## Features
 
-### Protocolo MCP Compliance
+### MCP Protocol Compliance
 
-- ✅ **Initialize**: Soporte completo para solicitudes initialize del protocolo MCP
-- ✅ **Tools/List**: Implementa método tools/list para devolver lista de herramientas disponibles  
-- ✅ **JSON-RPC 2.0**: Manejo correcto de solicitudes JSON-RPC 2.0 del protocolo MCP
-- ✅ **Registro de herramientas**: Las herramientas se registran correctamente en la respuesta
-- ✅ **Detección**: El servidor se detecta correctamente por el sistema MCP
-- ✅ **Testing**: Suite completa de pruebas de cumplimiento del protocolo
+- ✅ **Initialize**: Complete support for MCP protocol initialize requests
+- ✅ **Tools/List**: Implements tools/list method to return list of available tools  
+- ✅ **JSON-RPC 2.0**: Correct handling of MCP protocol JSON-RPC 2.0 requests
+- ✅ **Tool Registration**: Tools are correctly registered in the response
+- ✅ **Detection**: Server is correctly detected by MCP system
+- ✅ **Testing**: Complete protocol compliance test suite
 
-### Funcionalidades
+### Functionalities
 
-1. **extract_resources**: Extraer recursos embebidos (SVG, PNG, JPG, WebP, GIF) de archivos Gutenberg
-2. **analyze_file**: Analizar archivo para detectar recursos embebidos sin procesar
-3. **batch_process**: Procesar múltiples archivos Gutenberg en lote
-4. **get_statistics**: Obtener estadísticas detalladas de optimización
-5. **list_supported_types**: Listar tipos de recursos soportados
+1. **extract_resources**: Extract embedded resources (SVG, PNG, JPG, WebP, GIF) from Gutenberg files
+2. **analyze_file**: Analyze file to detect embedded resources without processing
+3. **batch_process**: Process multiple Gutenberg files in batch
+4. **get_statistics**: Get detailed optimization statistics
+5. **list_supported_types**: List supported resource types
 
-## Instalación y Configuración
+## Installation and Configuration
 
-### Requisitos
+### Requirements
 
 - Python 3.9+
-- Librerías: asyncio, json, logging, pathlib
+- Libraries: asyncio, json, logging, pathlib
 
-### Configuración MCP
+### MCP Configuration
 
-1. **Configuración en MCP Settings**:
+1. **Configuration in MCP Settings**:
 
 ```json
 {
@@ -46,19 +46,19 @@ Servidor MCP (Model Context Protocol) para extraer recursos embebidos en archivo
 }
 ```
 
-### Uso del Servidor
+### Server Usage
 
-#### Modo Stdio (Producción)
+#### Stdio Mode (Production)
 ```bash
 python mcp_server.py --stdio
 ```
 
-#### Modo HTTP (Desarrollo)
+#### HTTP Mode (Development)
 ```bash
 python mcp_server.py --host localhost --port 8080
 ```
 
-## API del Protocolo MCP
+## MCP Protocol API
 
 ### Initialize
 
@@ -92,7 +92,7 @@ python mcp_server.py --host localhost --port 8080
     "serverInfo": {
       "name": "gutenberg-extractor",
       "version": "2.0.0",
-      "description": "Servidor MCP para extracción de recursos embebidos en archivos Gutenberg"
+      "description": "MCP server for extracting embedded resources from Gutenberg files"
     }
   }
 }
@@ -119,28 +119,28 @@ python mcp_server.py --host localhost --port 8080
     "tools": [
       {
         "name": "extract_resources",
-        "description": "Extraer recursos embebidos de un archivo Gutenberg (SVG, PNG, JPG, etc.)",
+        "description": "Extract embedded resources from a Gutenberg file (SVG, PNG, JPG, etc.)",
         "inputSchema": {
           "type": "object",
           "properties": {
             "file_path": {
               "type": "string",
-              "description": "Ruta del archivo Gutenberg a procesar"
+              "description": "Path of the Gutenberg file to process"
             },
             "threshold_kb": {
               "type": "integer",
-              "description": "Umbral en KB para extraer recursos",
+              "description": "Threshold in KB to extract resources",
               "default": 1
             },
             "output_dir": {
               "type": "string",
-              "description": "Directorio de salida opcional"
+              "description": "Optional output directory"
             }
           },
           "required": ["file_path"]
         }
       }
-      // ... más herramientas
+      // ... more tools
     ]
   }
 }
@@ -191,9 +191,9 @@ python mcp_server.py --host localhost --port 8080
 }
 ```
 
-## Compatibilidad Legacy
+## Legacy Compatibility
 
-El servidor mantiene compatibilidad con métodos legacy para facilitar la migración:
+The server maintains compatibility with legacy methods to facilitate migration:
 
 - `extract_resources` (direct call)
 - `analyze_file` (direct call)  
@@ -201,27 +201,27 @@ El servidor mantiene compatibilidad con métodos legacy para facilitar la migrac
 - `get_statistics` (direct call)
 - `list_supported_types` (direct call)
 
-## Testing y Validación
+## Testing and Validation
 
-### Ejecutar Tests de Cumplimiento
+### Run Compliance Tests
 
 ```bash
 python test_mcp_compliance.py
 ```
 
-### Tests Incluidos
+### Included Tests
 
-1. **Initialize Test**: Valida respuesta correcta a initialize
-2. **Tools/List Test**: Verifica lista completa de herramientas
-3. **Tools/Call Test**: Prueba ejecución de herramientas
-4. **Legacy Methods Test**: Confirma compatibilidad legacy
-5. **Error Handling Test**: Valida manejo de errores JSON-RPC
+1. **Initialize Test**: Validates correct initialize response
+2. **Tools/List Test**: Verifies complete tool list
+3. **Tools/Call Test**: Tests tool execution
+4. **Legacy Methods Test**: Confirms legacy compatibility
+5. **Error Handling Test**: Validates JSON-RPC error handling
 
-### Reporte de Tests
+### Test Report
 
 ```
 ===========================================================
-REPORTE FINAL DE TESTS
+FINAL TEST REPORT
 ===========================================================
 initialize: ✅ PASSED
 tools_list: ✅ PASSED  
@@ -229,17 +229,17 @@ tools_call: ✅ PASSED
 legacy_methods: ✅ PASSED
 error_handling: ✅ PASSED
 
-Total: 5/5 tests pasados
-🎉 Todos los tests han pasado! El servidor cumple con el protocolo MCP
+Total: 5/5 tests passed
+🎉 All tests passed! The server complies with the MCP protocol
 ```
 
-## Ejemplo de Uso Completo
+## Complete Usage Example
 
 ```python
 import asyncio
 import json
 
-# Simular request initialize
+# Simulate initialize request
 initialize_request = {
     "jsonrpc": "2.0",
     "id": 1,
@@ -251,7 +251,7 @@ initialize_request = {
     }
 }
 
-# Simular request tools/list
+# Simulate tools/list request
 tools_list_request = {
     "jsonrpc": "2.0", 
     "id": 2,
@@ -259,7 +259,7 @@ tools_list_request = {
     "params": {}
 }
 
-# Simular request tools/call para list_supported_types
+# Simulate tools/call request for list_supported_types
 tools_call_request = {
     "jsonrpc": "2.0",
     "id": 3, 
@@ -271,71 +271,71 @@ tools_call_request = {
 }
 ```
 
-## Resolución de Problemas
+## Troubleshooting
 
-### Servidor No Se Detecta
+### Server Not Detected
 
-1. Verificar configuración MCP en settings
-2. Ejecutar tests de cumplimiento: `python test_mcp_compliance.py`
-3. Revisar logs del servidor para errores
-4. Confirmar que el archivo `mcp_server.py` es ejecutable
+1. Verify MCP configuration in settings
+2. Run compliance tests: `python test_mcp_compliance.py`
+3. Check server logs for errors
+4. Confirm that `mcp_server.py` file is executable
 
-### Herramientas No Aparecen
+### Tools Don't Appear
 
-1. Verificar que initialize se ejecuta correctamente
-2. Confirmar que tools/list responde con lista de herramientas
-3. Revisar estructura de respuesta tools/list
+1. Verify that initialize runs correctly
+2. Confirm that tools/list responds with tool list
+3. Check tools/list response structure
 
-### Errores JSON-RPC
+### JSON-RPC Errors
 
-1. Validar formato JSON de requests
-2. Verificar códigos de error correctos (-32601, -32602, -32603)
-3. Confirmar que el protocolo version coincide
+1. Validate JSON format of requests
+2. Verify correct error codes (-32601, -32602, -32603)
+3. Confirm that protocol version matches
 
-## Logs y Debugging
+## Logging and Debugging
 
-El servidor usa logging configurado con:
+The server uses logging configured with:
 
 ```python
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 ```
 
-### Logs Importantes
+### Important Logs
 
-- `INFO - Iniciando servidor MCP en modo stdio`
-- `INFO - Enviando request: {method}`
-- `INFO - Respuesta recibida: {server_name}`
-- `ERROR - Error manejando request: {error}`
+- `INFO - Starting MCP server in stdio mode`
+- `INFO - Sending request: {method}`
+- `INFO - Response received: {server_name}`
+- `ERROR - Error handling request: {error}`
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 tools/gutenberg-extractor/
-├── mcp_server.py              # Servidor MCP principal
-├── test_mcp_compliance.py     # Suite de pruebas
-├── gutenberg_extractor.py     # Extractor base
-├── README.md                  # Esta documentación
-├── example_usage.sh          # Ejemplo de uso
-└── setup_mcp.sh             # Script de configuración
+├── mcp_server.py              # Main MCP server
+├── test_mcp_compliance.py     # Test suite
+├── gutenberg_extractor.py     # Base extractor
+├── README.md                  # This documentation
+├── example_usage.sh          # Usage example
+└── setup_mcp.sh             # Configuration script
 ```
 
-## Versión y Actualizaciones
+## Version and Updates
 
-- **v2.0.0**: Cumplimiento completo del protocolo MCP
-- **v1.0.0**: Versión inicial básica
+- **v2.0.0**: Full MCP protocol compliance
+- **v1.0.0**: Basic initial version
 
-### Cambios en v2.0.0
+### Changes in v2.0.0
 
-- ✅ Implementación completa initialize/initialize
-- ✅ Soporte para tools/list y tools/call
-- ✅ Registro formal de herramientas MCP
-- ✅ Estructura de respuesta JSON-RPC 2.0 correcta
-- ✅ Suite de pruebas de cumplimiento
-- ✅ Compatibilidad con métodos legacy
+- ✅ Complete initialize/initialize implementation
+- ✅ Support for tools/list and tools/call
+- ✅ Formal MCP tool registration
+- ✅ Correct JSON-RPC 2.0 response structure
+- ✅ Compliance test suite
+- ✅ Compatibility with legacy methods
 
-## Contribución
+## Contribution
 
-1. Ejecutar tests: `python test_mcp_compliance.py`
-2. Verificar cumplimiento MCP antes de commit
-3. Documentar nuevas herramientas con schemas apropiados
-4. Mantener compatibilidad backward con legacy methods
+1. Run tests: `python test_mcp_compliance.py`
+2. Verify MCP compliance before commit
+3. Document new tools with appropriate schemas
+4. Maintain backward compatibility with legacy methods

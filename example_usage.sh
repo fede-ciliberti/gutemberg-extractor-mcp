@@ -1,20 +1,20 @@
 #!/bin/bash
-# Ejemplo de uso del Gutenberg Resource Extractor
+# Example usage of Gutenberg Resource Extractor
 
-echo "🚀 Gutenberg Resource Extractor - Ejemplo de Uso"
+echo "🚀 Gutenberg Resource Extractor - Usage Example"
 echo "================================================"
 
-# Verificar que Python3 esté disponible
+# Check if Python3 is available
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Error: Python3 no está instalado"
+    echo "❌ Error: Python3 is not installed"
     exit 1
 fi
 
-# Directorio de ejemplo
+# Example directory
 EXAMPLE_DIR="../examples"
 mkdir -p "$EXAMPLE_DIR"
 
-# Crear archivo de ejemplo con data URIs embebidos
+# Create example file with embedded data URIs
 cat > "$EXAMPLE_DIR/sample-gutenberg.template" << 'EOF'
 <!-- wp:group {"align":"full"} -->
 <div class="wp-block-group alignfull"><!-- wp:image -->
@@ -29,59 +29,59 @@ cat > "$EXAMPLE_DIR/sample-gutenberg.template" << 'EOF'
 <!-- /wp:group -->
 EOF
 
-echo "📄 Archivo de ejemplo creado: $EXAMPLE_DIR/sample-gutenberg.template"
+echo "📄 Example file created: $EXAMPLE_DIR/sample-gutenberg.template"
 
-# Ejecutar extractor con diferentes configuraciones
+# Run extractor with different configurations
 echo ""
-echo "🔧 Ejecutando extractor..."
+echo "🔧 Running extractor..."
 
-# Ejemplo 1: Uso básico
-echo "📋 Ejemplo 1: Uso básico"
+# Example 1: Basic usage
+echo "📋 Example 1: Basic usage"
 python3 gutenberg_extractor.py "$EXAMPLE_DIR/sample-gutenberg.template"
 
-# Ejemplo 2: Con umbral personalizado
+# Example 2: With custom threshold
 echo ""
-echo "📋 Ejemplo 2: Con umbral de 0 bytes (extraer todos)"
+echo "📋 Example 2: With 0 bytes threshold (extract all)"
 python3 gutenberg_extractor.py "$EXAMPLE_DIR/sample-gutenberg.template" --threshold 0 --verbose
 
-# Mostrar resultados
+# Show results
 echo ""
-echo "📊 Resultados:"
+echo "📊 Results:"
 echo "=============="
 
 if [ -d "$EXAMPLE_DIR/sample-gutenberg_extracted" ]; then
-    echo "✅ Directorio de salida creado: $EXAMPLE_DIR/sample-gutenberg_extracted/"
+    echo "✅ Output directory created: $EXAMPLE_DIR/sample-gutenberg_extracted/"
     echo ""
-    echo "📁 Contenido:"
+    echo "📁 Contents:"
     ls -la "$EXAMPLE_DIR/sample-gutenberg_extracted/"
     echo ""
-    echo "🖼️ Assets extraídos:"
-    ls -la "$EXAMPLE_DIR/sample-gutenberg_extracted/assets/" 2>/dev/null || echo "   No hay assets extraídos"
+    echo "🖼️ Extracted assets:"
+    ls -la "$EXAMPLE_DIR/sample-gutenberg_extracted/assets/" 2>/dev/null || echo "   No extracted assets"
     echo ""
-    echo "📋 Metadatos del proceso:"
+    echo "📋 Process metadata:"
     if [ -f "$EXAMPLE_DIR/sample-gutenberg_extracted/extraction_metadata.json" ]; then
-        echo "   Archivo: extraction_metadata.json"
-        echo "   Tamaño del archivo original vs optimizado:"
+        echo "   File: extraction_metadata.json"
+        echo "   Original vs optimized file size:"
         ORIGINAL_SIZE=$(stat -c%s "$EXAMPLE_DIR/sample-gutenberg.template")
         OPTIMIZED_SIZE=$(stat -c%s "$EXAMPLE_DIR/sample-gutenberg_extracted/sample-gutenberg.template")
         echo "   Original: $ORIGINAL_SIZE bytes"
-        echo "   Optimizado: $OPTIMIZED_SIZE bytes"
+        echo "   Optimized: $OPTIMIZED_SIZE bytes"
         if [ $ORIGINAL_SIZE -gt $OPTIMIZED_SIZE ]; then
             SAVED=$((ORIGINAL_SIZE - OPTIMIZED_SIZE))
             PERCENT=$((SAVED * 100 / ORIGINAL_SIZE))
-            echo "   ✅ Ahorro: $SAVED bytes ($PERCENT%)"
+            echo "   ✅ Savings: $SAVED bytes ($PERCENT%)"
         else
-            echo "   ℹ️ Sin reducción de tamaño (archivo muy pequeño)"
+            echo "   ℹ️ No size reduction (file too small)"
         fi
     fi
 else
-    echo "❌ Error: No se creó el directorio de salida"
+    echo "❌ Error: Output directory not created"
 fi
 
 echo ""
-echo "🎉 Ejemplo completado!"
+echo "🎉 Example completed!"
 echo ""
-echo "💡 Para usar con tus propios archivos:"
-echo "   python3 gutenberg_extractor.py tu_archivo.template"
+echo "💡 To use with your own files:"
+echo "   python3 gutenberg_extractor.py your_file.template"
 echo ""
-echo "📖 Consulta README.md para documentación completa"
+echo "📖 See README.md for complete documentation"

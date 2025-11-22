@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
 Gutenberg Resource Extractor
-===========================
+=============================
 
-Herramienta para extraer recursos grandes embebidos en archivos Gutenberg
-exportados desde Figma y optimizarlos para reducir el tamaño del contexto.
+Tool to extract large embedded resources in Gutenberg files
+exported from Figma and optimize them to reduce context size.
 
-Autor: Roo AI Agent
-Versión: 1.0.0
+Author: Roo AI Agent
+Version: 1.0.0
 """
 
 import os
@@ -20,25 +20,25 @@ from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 import logging
 
-# Configuración de logging
+# Logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
 class GutenbergExtractor:
-    """Extractor de recursos embebidos para archivos Gutenberg."""
+    """Extractor for embedded resources in Gutenberg files."""
     
     def __init__(self, threshold_kb: int = 1):
         """
-        Inicializar el extractor.
+        Initialize the extractor.
         
         Args:
-            threshold_kb: Umbral en KB para extraer recursos (default: 1KB)
+            threshold_kb: Threshold in KB to extract resources (default: 1KB)
         """
         self.threshold_kb = threshold_kb
         self.threshold_bytes = threshold_kb * 1024
         
-        # Patrones regex para diferentes tipos de data URIs
+        # Regex patterns for different data URI types
         self.patterns = {
             'svg': re.compile(r'data:image/svg\+xml(?:;charset=utf-8)?,(?P<content>[^"\'<]+)'),
             'png': re.compile(r'data:image/png(?:;charset=utf-8)?;base64,\s*(?P<content>[A-Za-z0-9+/=]+)'),
@@ -47,7 +47,7 @@ class GutenbergExtractor:
             'gif': re.compile(r'data:image/gif(?:;charset=utf-8)?;base64,\s*(?P<content>[A-Za-z0-9+/=]+)')
         }
         
-        # Mapeo de tipos a extensiones
+        # Mapping of types to extensions
         self.type_extensions = {
             'svg': '.svg',
             'png': '.png',
@@ -56,7 +56,7 @@ class GutenbergExtractor:
             'gif': '.gif'
         }
         
-        # Contadores para estadísticas
+        # Counters for statistics
         self.stats = {
             'total_resources': 0,
             'extracted': 0,
@@ -67,78 +67,78 @@ class GutenbergExtractor:
     
     def extract_data_uri_content(self, match: re.Match, resource_type: str) -> Optional[bytes]:
         """
-        Extraer contenido de un data URI.
+        Extract content from a data URI.
         
         Args:
-            match: Match regex
-            resource_type: Tipo de recurso ('svg', 'png', etc.)
+            match: Regex match
+            resource_type: Resource type ('svg', 'png', etc.)
             
         Returns:
-            Contenido decodificado o None si falla
+            Decoded content or None if fails
         """
         try:
             if resource_type == 'svg':
-                # Los SVG pueden estar URL-encoded
+                # SVGs may be URL-encoded
                 import urllib.parse
                 content = urllib.parse.unquote(match.group('content'))
-                # Verificar si es un SVG válido (debe tener <svg> al inicio)
+                # Check if it's a valid SVG (must have <svg> at start)
                 if not content.strip().startswith('<svg'):
-                    logger.warning(f"SVG inválido detectado: {content[:50]}...")
-                    return content.encode('utf-8')  # Devolver el contenido tal como está
+                    logger.warning(f"Invalid SVG detected: {content[:50]}...")
+                    return content.encode('utf-8')  # Return content as-is
                 return content.encode('utf-8')
             else:
-                # Base64 para otros tipos
+                # Base64 for other types
                 content = match.group('content')
-                # Manejar padding incompleto en base64
+                # Handle incomplete base64 padding
                 missing_padding = len(content) % 4
                 if missing_padding:
                     content += '=' * (4 - missing_padding)
                 return base64.b64decode(content)
         except Exception as e:
-            logger.error(f"Error decodificando {resource_type}: {e}")
+            logger.error(f"Error decoding {resource_type}: {e}")
             return None
     
     def calculate_hash(self, data: bytes) -> str:
         """
-        Calcular hash MD5 de los datos.
+        Calculate MD5 hash of data.
         
         Args:
-            data: Datos binarios
+            data: Binary data
             
         Returns:
-            Hash MD5 en hexadecimal
+            Hexadecimal MD5 hash
         """
         return hashlib.md5(data).hexdigest()[:12]
     
     def generate_filename(self, resource_type: str, content_hash: str, index: int) -> str:
         """
-        Generar nombre de archivo para el recurso.
+        Generate filename for the resource.
         
         Args:
-            resource_type: Tipo de recurso
-            content_hash: Hash del contenido
-            index: Índice del recurso
+            resource_type: Resource type
+            content_hash: Content hash
+            index: Resource index
             
         Returns:
-            Nombre de archivo generado
+            Generated filename
         """
         extension = self.type_extensions.get(resource_type, '.bin')
         return f"{resource_type}_{content_hash}_{index}{extension}"
     
     def extract_resources_from_file(self, file_path: Path, output_dir: Path) -> Tuple[str, List[Dict]]:
         """
-        Extraer recursos de un archivo Gutenberg.
+        Extract resources from a Gutenberg file.
         
         Args:
-            file_path: Ruta del archivo origen
-            output_dir: Directorio de salida para recursos
+            file_path: Source file path
+            output_dir: Output directory for resources
             
         Returns:
-            Tupla (contenido_optimizado, metadatos)
+            Tuple (optimized_content, metadata)
         """
-        logger.info(f"Procesando archivo: {file_path}")
+        logger.info(f"Processing file: {file_path}")
         
-        # Leer archivo original
+        # Read original file
         with open(file_path, 'r', encoding='utf-8') as f:
             original_content = f.read()
         
@@ -147,44 +147,44 @@ class GutenbergExtractor:
         extracted_resources = []
         resource_index = 0
         
-        # Procesar cada tipo de data URI
+        # Process each data URI type
         for resource_type, pattern in self.patterns.items():
             matches = list(pattern.finditer(original_content))
-            logger.info(f"Encontrados {len(matches)} recursos {resource_type}")
+            logger.info(f"Found {len(matches)} {resource_type} resources")
             
             for match in matches:
                 self.stats['total_resources'] += 1
                 
-                # Extraer contenido
+                # Extract content
                 content = self.extract_data_uri_content(match, resource_type)
                 if not content:
                     self.stats['skipped'] += 1
                     continue
                 
-                # Verificar tamaño
+                # Check size
                 if len(content) < self.threshold_bytes:
                     self.stats['skipped'] += 1
-                    logger.info(f"Recurso {resource_type} muy pequeño ({len(content)} bytes), omitido")
+                    logger.info(f"{resource_type} resource too small ({len(content)} bytes), skipped")
                     continue
                 
-                # Generar archivo de salida
+                # Generate output file
                 content_hash = self.calculate_hash(content)
                 filename = self.generate_filename(resource_type, content_hash, resource_index)
                 resource_path = output_dir / filename
                 
-                # Escribir archivo
+                # Write file
                 try:
                     with open(resource_path, 'wb') as f:
                         f.write(content)
                     
-                    # Calcular URL relativa
+                    # Calculate relative URL
                     relative_url = f"assets/{filename}"
                     
-                    # Reemplazar en el contenido optimizado
+                    # Replace in optimized content
                     replacement = f'src="{relative_url}"'
                     optimized_content = optimized_content.replace(match.group(0), replacement, 1)
                     
-                    # Guardar metadatos
+                    # Save metadata
                     resource_info = {
                         'type': resource_type,
                         'original_data_uri': match.group(0),
@@ -200,10 +200,10 @@ class GutenbergExtractor:
                     self.stats['extracted'] += 1
                     resource_index += 1
                     
-                    logger.info(f"Extraído: {filename} ({len(content)} bytes)")
+                    logger.info(f"Extracted: {filename} ({len(content)} bytes)")
                     
                 except Exception as e:
-                    logger.error(f"Error guardando {filename}: {e}")
+                    logger.error(f"Error saving {filename}: {e}")
                     self.stats['skipped'] += 1
         
         self.stats['optimized_size'] = len(optimized_content)
@@ -212,24 +212,24 @@ class GutenbergExtractor:
     
     def process_file(self, input_file: str, output_dir: Optional[str] = None) -> Dict:
         """
-        Procesar un archivo Gutenberg completo con nueva convención de nomenclatura.
+        Process a complete Gutenberg file with new naming convention.
         
         Args:
-            input_file: Ruta del archivo de entrada (.gutemberg)
-            output_dir: Directorio de salida (opcional)
+            input_file: Input file path (.gutemberg)
+            output_dir: Output directory (optional)
             
         Returns:
-            Diccionario con resultados del procesamiento
+            Dictionary with processing results
         """
         input_path = Path(input_file)
         if not input_path.exists():
-            raise FileNotFoundError(f"Archivo no encontrado: {input_file}")
+            raise FileNotFoundError(f"File not found: {input_file}")
         
-        # Validar que sea un archivo .gutemberg
+        # Validate that it's a .gutemberg file
         if not input_path.suffix == '.gutemberg':
-            raise ValueError(f"El archivo debe tener extensión .gutemberg, recibido: {input_path.suffix}")
+            raise ValueError(f"File must have .gutemberg extension, received: {input_path.suffix}")
         
-        # Determinar directorio de salida
+        # Determine output directory
         if output_dir is None:
             output_dir = input_path.parent / input_path.stem
         else:
@@ -237,21 +237,21 @@ class GutenbergExtractor:
         
         output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Crear subdirectorio para assets
+        # Create assets subdirectory
         assets_dir = output_dir / "assets"
         assets_dir.mkdir(exist_ok=True)
         
-        logger.info(f"Directorio de salida: {output_dir}")
+        logger.info(f"Output directory: {output_dir}")
         
-        # Extraer recursos
+        # Extract resources
         optimized_content, resources = self.extract_resources_from_file(input_path, assets_dir)
         
-        # Guardar archivo optimizado como index.html
+        # Save optimized file as index.html
         optimized_file = output_dir / "index.html"
         with open(optimized_file, 'w', encoding='utf-8') as f:
             f.write(optimized_content)
         
-        # Guardar metadatos
+        # Save metadata
         metadata = {
             'original_file': str(input_path),
             'original_filename': input_path.name,
@@ -274,29 +274,29 @@ class GutenbergExtractor:
         with open(metadata_file, 'w', encoding='utf-8') as f:
             json.dump(metadata, f, indent=2)
         
-        logger.info(f"Procesamiento completado con nueva convención:")
+        logger.info(f"Processing completed with new convention:")
         logger.info(f"  - Input: {input_path.name}")
         logger.info(f"  - Output: {output_dir}/index.html")
         logger.info(f"  - Assets: {output_dir}/assets/")
-        logger.info(f"  - Recursos totales: {self.stats['total_resources']}")
-        logger.info(f"  - Extraídos: {self.stats['extracted']}")
-        logger.info(f"  - Omitidos: {self.stats['skipped']}")
-        logger.info(f"  - Tamaño original: {self.stats['original_size']:,} bytes")
-        logger.info(f"  - Tamaño optimizado: {self.stats['optimized_size']:,} bytes")
-        logger.info(f"  - Reducción: {((self.stats['original_size'] - self.stats['optimized_size']) / self.stats['original_size'] * 100):.1f}%")
+        logger.info(f"  - Total resources: {self.stats['total_resources']}")
+        logger.info(f"  - Extracted: {self.stats['extracted']}")
+        logger.info(f"  - Skipped: {self.stats['skipped']}")
+        logger.info(f"  - Original size: {self.stats['original_size']:,} bytes")
+        logger.info(f"  - Optimized size: {self.stats['optimized_size']:,} bytes")
+        logger.info(f"  - Reduction: {((self.stats['original_size'] - self.stats['optimized_size']) / self.stats['original_size'] * 100):.1f}%")
         
         return metadata
 
 
 def main():
-    """Función principal."""
-    parser = argparse.ArgumentParser(description='Extractor de recursos para archivos Gutenberg (.gutemberg)')
-    parser.add_argument('input_file', help='Archivo Gutenberg a procesar (.gutemberg)')
-    parser.add_argument('-o', '--output', help='Directorio de salida (opcional)')
+    """Main function."""
+    parser = argparse.ArgumentParser(description='Resource extractor for Gutenberg files (.gutemberg)')
+    parser.add_argument('input_file', help='Gutenberg file to process (.gutemberg)')
+    parser.add_argument('-o', '--output', help='Output directory (optional)')
     parser.add_argument('-t', '--threshold', type=int, default=1,
-                       help='Umbral en KB para extraer recursos (default: 1KB)')
+                       help='Threshold in KB to extract resources (default: 1KB)')
     parser.add_argument('-v', '--verbose', action='store_true',
-                       help='Output detallado')
+                       help='Verbose output')
     
     args = parser.parse_args()
     
@@ -307,15 +307,15 @@ def main():
         extractor = GutenbergExtractor(threshold_kb=args.threshold)
         metadata = extractor.process_file(args.input_file, args.output)
         
-        print(f"\n✅ Procesamiento completado exitosamente con nueva convención!")
+        print(f"\n✅ Processing completed successfully with new convention!")
         print(f"📄 Input: {metadata['original_filename']}")
         print(f"🏠 Output: {metadata['optimized_file']}")
         print(f"📂 Assets: {metadata['assets_directory']}")
         print(f"📁 Metadata: {metadata['output_directory']}/extraction_metadata.json")
-        print(f"💾 Reducción: {((metadata['statistics']['original_size'] - metadata['statistics']['optimized_size']) / metadata['statistics']['original_size'] * 100):.1f}%")
+        print(f"💾 Reduction: {((metadata['statistics']['original_size'] - metadata['statistics']['optimized_size']) / metadata['statistics']['original_size'] * 100):.1f}%")
         
     except Exception as e:
-        logger.error(f"Error procesando archivo: {e}")
+        logger.error(f"Error processing file: {e}")
         return 1
     
     return 0

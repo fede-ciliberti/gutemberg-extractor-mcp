@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test simple del servidor MCP
+Simple MCP server test
 """
 
 import asyncio
@@ -9,9 +9,9 @@ import subprocess
 import sys
 
 async def test_mcp():
-    print("🚀 Test simple del servidor MCP")
+    print("🚀 Simple MCP server test")
     
-    # Crear proceso del servidor
+    # Create server process
     process = await asyncio.create_subprocess_exec(
         sys.executable, 'mcp_server.py', '--stdio',
         stdin=asyncio.subprocess.PIPE,
@@ -33,19 +33,19 @@ async def test_mcp():
             }
         }
         
-        # Enviar request y leer respuesta
+        # Send request and read response
         process.stdin.write((json.dumps(init_request) + '\n').encode())
         await process.stdin.drain()
         
-        # Leer respuesta con timeout
+        # Read response with timeout
         try:
             response = await asyncio.wait_for(process.stdout.readline(), timeout=5.0)
             if response:
-                print(f"✅ Respuesta 1: {response.decode()}")
+                print(f"✅ Response 1: {response.decode()}")
             else:
-                print("❌ No hay respuesta 1")
+                print("❌ No response 1")
         except asyncio.TimeoutError:
-            print("❌ Timeout en respuesta 1")
+            print("❌ Timeout in response 1")
         
         # Test 2: tools/list
         print("📤 Test 2: tools/list")
@@ -61,13 +61,13 @@ async def test_mcp():
         try:
             response = await asyncio.wait_for(process.stdout.readline(), timeout=5.0)
             if response:
-                print(f"✅ Respuesta 2: {response.decode()}")
+                print(f"✅ Response 2: {response.decode()}")
             else:
-                print("❌ No hay respuesta 2")
+                print("❌ No response 2")
         except asyncio.TimeoutError:
-            print("❌ Timeout en respuesta 2")
+            print("❌ Timeout in response 2")
             
-        print("✅ Test completo")
+        print("✅ Complete test")
         
     except Exception as e:
         print(f"❌ Error: {e}")

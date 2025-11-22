@@ -3,12 +3,12 @@
 Gutenberg Resource Extractor MCP Server
 ========================================
 
-Servidor MCP (Model Context Protocol) para extraer recursos embebidos
-en archivos Gutenberg usando la herramienta gutenberg_extractor.py
+MCP (Model Context Protocol) server for extracting embedded resources
+from Gutenberg files using the gutenberg_extractor.py tool
 
-Autor: Roo AI Agent
-Versión: 2.0.0
-Cumplimiento: Protocolo MCP completo
+Author: Roo AI Agent
+Version: 2.0.0
+Compliance: Full MCP Protocol
 """
 
 import asyncio
@@ -20,17 +20,17 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 import argparse
 
-# Añadir directorio actual al path para importar el extractor
+# Add current directory to path to import the extractor
 sys.path.insert(0, os.path.dirname(__file__))
 from gutenberg_extractor import GutenbergExtractor
 
-# Configuración de logging
+# Logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
 class GutenbergExtractorMCPServer:
-    """Servidor MCP para extracción de recursos Gutenberg."""
+    """MCP server for Gutenberg resource extraction."""
     
     def __init__(self):
         self.extractor = GutenbergExtractor(threshold_kb=1)
@@ -40,26 +40,26 @@ class GutenbergExtractorMCPServer:
         self.tools = self._register_tools()
     
     def _register_tools(self) -> Dict[str, Dict]:
-        """Registrar herramientas MCP disponibles."""
+        """Register available MCP tools."""
         return {
             "extract_resources": {
                 "name": "extract_resources",
-                "description": "Extraer recursos embebidos de un archivo Gutenberg (.gutemberg) (SVG, PNG, JPG, etc.)",
+                "description": "Extract embedded resources from a Gutenberg file (.gutemberg) (SVG, PNG, JPG, etc.)",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "file_path": {
                             "type": "string",
-                            "description": "Ruta del archivo Gutenberg a procesar"
+                            "description": "Path of the Gutenberg file to process"
                         },
                         "threshold_kb": {
                             "type": "integer",
-                            "description": "Umbral en KB para extraer recursos",
+                            "description": "Threshold in KB to extract resources",
                             "default": 1
                         },
                         "output_dir": {
                             "type": "string",
-                            "description": "Directorio de salida opcional"
+                            "description": "Optional output directory"
                         }
                     },
                     "required": ["file_path"]
@@ -67,13 +67,13 @@ class GutenbergExtractorMCPServer:
             },
             "analyze_file": {
                 "name": "analyze_file",
-                "description": "Analizar un archivo Gutenberg (.gutemberg) sin procesar para detectar recursos embebidos",
+                "description": "Analyze a Gutenberg file (.gutemberg) without processing to detect embedded resources",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "file_path": {
                             "type": "string",
-                            "description": "Ruta del archivo Gutenberg a analizar"
+                            "description": "Path of the Gutenberg file to analyze"
                         }
                     },
                     "required": ["file_path"]
@@ -81,23 +81,23 @@ class GutenbergExtractorMCPServer:
             },
             "batch_process": {
                 "name": "batch_process",
-                "description": "Procesar múltiples archivos Gutenberg (.gutemberg) en lote",
+                "description": "Process multiple Gutenberg files (.gutemberg) in batch",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "file_paths": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "Lista de rutas de archivos a procesar"
+                            "description": "List of file paths to process"
                         },
                         "threshold_kb": {
                             "type": "integer",
-                            "description": "Umbral en KB para extraer recursos",
+                            "description": "Threshold in KB to extract resources",
                             "default": 1
                         },
                         "output_base_dir": {
                             "type": "string",
-                            "description": "Directorio base de salida opcional"
+                            "description": "Optional base output directory"
                         }
                     },
                     "required": ["file_paths"]
@@ -105,13 +105,13 @@ class GutenbergExtractorMCPServer:
             },
             "get_statistics": {
                 "name": "get_statistics",
-                "description": "Obtener estadísticas detalladas de optimización desde archivo de metadatos",
+                "description": "Get detailed optimization statistics from metadata file",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "metadata_file_path": {
                             "type": "string",
-                            "description": "Ruta al archivo de metadatos JSON"
+                            "description": "Path to JSON metadata file"
                         }
                     },
                     "required": ["metadata_file_path"]
@@ -119,7 +119,7 @@ class GutenbergExtractorMCPServer:
             },
             "list_supported_types": {
                 "name": "list_supported_types",
-                "description": "Listar tipos de recursos soportados para extracción",
+                "description": "List supported resource types for extraction",
                 "inputSchema": {
                     "type": "object",
                     "properties": {},
@@ -130,33 +130,33 @@ class GutenbergExtractorMCPServer:
     
     async def extract_resources(self, file_path: str, threshold_kb: int = 1, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """
-        Extraer recursos de un archivo Gutenberg.
+        Extract resources from a Gutenberg file.
         
         Args:
-            file_path: Ruta del archivo a procesar
-            threshold_kb: Umbral en KB para extraer recursos
-            output_dir: Directorio de salida (opcional)
+            file_path: Path of the file to process
+            threshold_kb: Threshold in KB to extract resources
+            output_dir: Output directory (optional)
             
         Returns:
-            Diccionario con resultados
+            Dictionary with results
         """
         try:
-            # Validar que el archivo existe
+            # Validate that the file exists
             input_path = Path(file_path)
             if not input_path.exists():
                 return {
                     "success": False,
-                    "error": f"Archivo no encontrado: {file_path}",
+                    "error": f"File not found: {file_path}",
                     "results": None
                 }
             
-            # Crear extractor con umbral especificado
+            # Create extractor with specified threshold
             extractor = GutenbergExtractor(threshold_kb=threshold_kb)
             
-            # Procesar archivo
+            # Process file
             metadata = extractor.process_file(file_path, output_dir)
             
-            # Formatear respuesta
+            # Format response
             return {
                 "success": True,
                 "error": None,
@@ -175,7 +175,7 @@ class GutenbergExtractorMCPServer:
             }
             
         except Exception as e:
-            logger.error(f"Error procesando archivo {file_path}: {e}")
+            logger.error(f"Error processing file {file_path}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -184,29 +184,29 @@ class GutenbergExtractorMCPServer:
     
     async def analyze_file(self, file_path: str) -> Dict[str, Any]:
         """
-        Analizar un archivo Gutenberg sin procesar, solo detectar recursos.
+        Analyze a Gutenberg file without processing, only detect resources.
         
         Args:
-            file_path: Ruta del archivo a analizar
+            file_path: Path of the file to analyze
             
         Returns:
-            Diccionario con análisis de recursos
+            Dictionary with resource analysis
         """
         try:
-            # Validar que el archivo existe
+            # Validate that the file exists
             input_path = Path(file_path)
             if not input_path.exists():
                 return {
                     "success": False,
-                    "error": f"Archivo no encontrado: {file_path}",
+                    "error": f"File not found: {file_path}",
                     "analysis": None
                 }
             
-            # Leer archivo y buscar patterns
+            # Read file and search patterns
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # Análisis básico
+            # Basic analysis
             analysis = {
                 "file_path": str(input_path.absolute()),
                 "file_size": len(content),
@@ -215,7 +215,7 @@ class GutenbergExtractorMCPServer:
                 "estimated_savings": 0
             }
             
-            # Buscar diferentes tipos de data URIs
+            # Search for different data URI types
             patterns = self.extractor.patterns
             
             for resource_type, pattern in patterns.items():
@@ -226,8 +226,8 @@ class GutenbergExtractorMCPServer:
                 }
                 analysis["total_data_uris"] += len(matches)
             
-            # Estimación simplificada de ahorros
-            analysis["estimated_savings"] = analysis["total_data_uris"] * 0.1  # 10% por data URI
+            # Simplified savings estimation
+            analysis["estimated_savings"] = analysis["total_data_uris"] * 0.1  # 10% per data URI
             
             return {
                 "success": True,
@@ -236,7 +236,7 @@ class GutenbergExtractorMCPServer:
             }
             
         except Exception as e:
-            logger.error(f"Error analizando archivo {file_path}: {e}")
+            logger.error(f"Error analyzing file {file_path}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -245,15 +245,15 @@ class GutenbergExtractorMCPServer:
     
     async def batch_process(self, file_paths: List[str], threshold_kb: int = 1, output_base_dir: Optional[str] = None) -> Dict[str, Any]:
         """
-        Procesar múltiples archivos Gutenberg en lote.
+        Process multiple Gutenberg files in batch.
         
         Args:
-            file_paths: Lista de rutas de archivos a procesar
-            threshold_kb: Umbral en KB para extraer recursos
-            output_base_dir: Directorio base de salida (opcional)
+            file_paths: List of file paths to process
+            threshold_kb: Threshold in KB to extract resources
+            output_base_dir: Base output directory (optional)
             
         Returns:
-            Diccionario con resultados del procesamiento en lote
+            Dictionary with batch processing results
         """
         try:
             results = []
@@ -265,28 +265,28 @@ class GutenbergExtractorMCPServer:
             
             for file_path in file_paths:
                 try:
-                    # Validar archivo
+                    # Validate file
                     input_path = Path(file_path)
                     if not input_path.exists():
-                        errors.append(f"Archivo no encontrado: {file_path}")
+                        errors.append(f"File not found: {file_path}")
                         continue
                     
-                    # Crear directorio de salida específico
+                    # Create specific output directory
                     file_output_dir = None
                     if output_base_dir:
                         file_output_dir = f"{output_base_dir}/{input_path.stem}_batch"
                     
-                    # Procesar archivo individual
+                    # Process individual file
                     extractor = GutenbergExtractor(threshold_kb=threshold_kb)
                     metadata = extractor.process_file(file_path, file_output_dir)
                     
-                    # Acumular estadísticas
+                    # Accumulate statistics
                     total_processed += 1
                     total_extracted += metadata['statistics']['extracted']
                     total_original_size += metadata['statistics']['original_size']
                     total_optimized_size += metadata['statistics']['optimized_size']
                     
-                    # Agregar resultado individual
+                    # Add individual result
                     result = {
                         "file_path": file_path,
                         "original_file": metadata["original_file"],
@@ -302,7 +302,7 @@ class GutenbergExtractorMCPServer:
                     results.append(result)
                     
                 except Exception as e:
-                    error_msg = f"Error procesando {file_path}: {str(e)}"
+                    error_msg = f"Error processing {file_path}: {str(e)}"
                     errors.append(error_msg)
                     logger.error(error_msg)
                     results.append({
@@ -311,7 +311,7 @@ class GutenbergExtractorMCPServer:
                         "error": str(e)
                     })
             
-            # Calcular estadísticas generales
+            # Calculate overall statistics
             total_reduction = total_original_size - total_optimized_size
             overall_reduction_percentage = round(
                 (total_reduction / total_original_size * 100), 2
@@ -335,7 +335,7 @@ class GutenbergExtractorMCPServer:
             }
             
         except Exception as e:
-            logger.error(f"Error en procesamiento en lote: {e}")
+            logger.error(f"Error in batch processing: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -346,33 +346,33 @@ class GutenbergExtractorMCPServer:
     
     async def get_statistics(self, metadata_file_path: str) -> Dict[str, Any]:
         """
-        Obtener estadísticas de optimización de un archivo de metadatos.
+        Get optimization statistics from a metadata file.
         
         Args:
-            metadata_file_path: Ruta al archivo de metadatos JSON
+            metadata_file_path: Path to JSON metadata file
             
         Returns:
-            Diccionario con estadísticas detalladas
+            Dictionary with detailed statistics
         """
         try:
-            # Validar que el archivo de metadatos existe
+            # Validate that the metadata file exists
             metadata_path = Path(metadata_file_path)
             if not metadata_path.exists():
                 return {
                     "success": False,
-                    "error": f"Archivo de metadatos no encontrado: {metadata_file_path}",
+                    "error": f"Metadata file not found: {metadata_file_path}",
                     "statistics": None
                 }
             
-            # Cargar metadatos
+            # Load metadata
             with open(metadata_path, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
             
-            # Calcular estadísticas adicionales
+            # Calculate additional statistics
             stats = metadata.get('statistics', {})
             extracted_resources = metadata.get('extracted_resources', [])
             
-            # Análisis por tipo de recurso
+            # Resource type analysis
             resource_type_analysis = {}
             for resource in extracted_resources:
                 resource_type = resource.get('type', 'unknown')
@@ -388,7 +388,7 @@ class GutenbergExtractorMCPServer:
                 resource_type_analysis[resource_type]['total_size'] += resource.get('size_bytes', 0)
                 resource_type_analysis[resource_type]['files'].append(resource.get('file', ''))
             
-            # Calcular tamaños promedio
+            # Calculate average sizes
             for resource_type in resource_type_analysis:
                 if resource_type_analysis[resource_type]['count'] > 0:
                     resource_type_analysis[resource_type]['average_size'] = round(
@@ -396,7 +396,7 @@ class GutenbergExtractorMCPServer:
                         resource_type_analysis[resource_type]['count']
                     )
             
-            # Análisis de eficiencia
+            # Efficiency analysis
             efficiency_metrics = {
                 'resources_per_kb_saved': round(
                     stats.get('extracted', 0) / max(stats.get('original_size', 0) / 1024 / 1000, 1),
@@ -412,7 +412,7 @@ class GutenbergExtractorMCPServer:
                 )
             }
             
-            # Proyección de ahorro
+            # Savings projection
             projection = {
                 'estimated_monthly_savings_mb': round(
                     (stats.get('original_size', 0) - stats.get('optimized_size', 0)) * 100 / 1024 / 1024,
@@ -442,7 +442,7 @@ class GutenbergExtractorMCPServer:
             }
             
         except Exception as e:
-            logger.error(f"Error obteniendo estadísticas de {metadata_file_path}: {e}")
+            logger.error(f"Error getting statistics from {metadata_file_path}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -451,10 +451,10 @@ class GutenbergExtractorMCPServer:
     
     async def list_supported_types(self) -> Dict[str, Any]:
         """
-        Listar tipos de recursos soportados.
+        List supported resource types.
         
         Returns:
-            Diccionario con tipos soportados
+            Dictionary with supported types
         """
         return {
             "success": True,
@@ -464,38 +464,38 @@ class GutenbergExtractorMCPServer:
                     "pattern": "data:image/svg+xml",
                     "extension": ".svg",
                     "decode_method": "url_decode",
-                    "description": "Imágenes vectoriales SVG embebidas"
+                    "description": "Embedded SVG vector images"
                 },
                 "png": {
                     "pattern": "data:image/png;base64",
                     "extension": ".png",
                     "decode_method": "base64_decode",
-                    "description": "Imágenes PNG con transparencia"
+                    "description": "PNG images with transparency"
                 },
                 "jpg": {
                     "pattern": "data:image/jpeg;base64",
                     "extension": ".jpg",
                     "decode_method": "base64_decode",
-                    "description": "Imágenes JPG fotográficas"
+                    "description": "JPG photographic images"
                 },
                 "webp": {
                     "pattern": "data:image/webp;base64",
                     "extension": ".webp",
                     "decode_method": "base64_decode",
-                    "description": "Imágenes WebP optimizadas"
+                    "description": "Optimized WebP images"
                 },
                 "gif": {
                     "pattern": "data:image/gif;base64",
                     "extension": ".gif",
                     "decode_method": "base64_decode",
-                    "description": "Imágenes GIF animadas"
+                    "description": "Animated GIF images"
                 }
             }
         }
 
 
 async def handle_initialize(params: Dict[str, Any]) -> Dict[str, Any]:
-    """Manejar solicitud initialize del protocolo MCP."""
+    """Handle initialize request from MCP protocol."""
     return {
         "protocolVersion": "2024-11-05",
         "capabilities": {
@@ -504,13 +504,13 @@ async def handle_initialize(params: Dict[str, Any]) -> Dict[str, Any]:
         "serverInfo": {
             "name": "gutenberg-extractor",
             "version": "2.0.0",
-            "description": "Servidor MCP para extracción de recursos embebidos en archivos Gutenberg"
+            "description": "MCP server for extracting embedded resources from Gutenberg files"
         }
     }
 
 
 async def handle_list_tools() -> Dict[str, Any]:
-    """Manejar solicitud tools/list del protocolo MCP."""
+    """Handle tools/list request from MCP protocol."""
     server = GutenbergExtractorMCPServer()
     tools = list(server.tools.values())
     
@@ -520,14 +520,14 @@ async def handle_list_tools() -> Dict[str, Any]:
 
 
 async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
-    """Manejar request del MCP."""
+    """Handle MCP request."""
     server = GutenbergExtractorMCPServer()
     
     method = request.get("method")
     params = request.get("params", {})
     
     try:
-        # Protocolo MCP methods
+        # Protocol MCP methods
         if method == "initialize":
             result = await handle_initialize(params)
             
@@ -542,10 +542,10 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                 return {
                     "jsonrpc": "2.0",
                     "id": request.get("id"),
-                    "error": {"code": -32601, "message": f"Herramienta no encontrada: {tool_name}"}
+                    "error": {"code": -32601, "message": f"Tool not found: {tool_name}"}
                 }
             
-            # Ejecutar herramienta específica
+            # Execute specific tool
             if tool_name == "extract_resources":
                 file_path = tool_args.get("file_path")
                 threshold_kb = tool_args.get("threshold_kb", 1)
@@ -555,7 +555,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "file_path es requerido"}
+                        "error": {"code": -32602, "message": "file_path is required"}
                     }
                 
                 result = await server.extract_resources(file_path, threshold_kb, output_dir)
@@ -567,7 +567,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "file_path es requerido"}
+                        "error": {"code": -32602, "message": "file_path is required"}
                     }
                 
                 result = await server.analyze_file(file_path)
@@ -581,7 +581,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "file_paths es requerido"}
+                        "error": {"code": -32602, "message": "file_paths is required"}
                     }
                 
                 result = await server.batch_process(file_paths, threshold_kb, output_base_dir)
@@ -593,7 +593,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "metadata_file_path es requerido"}
+                        "error": {"code": -32602, "message": "metadata_file_path is required"}
                     }
                 
                 result = await server.get_statistics(metadata_file_path)
@@ -605,10 +605,10 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                 return {
                     "jsonrpc": "2.0",
                     "id": request.get("id"),
-                    "error": {"code": -32601, "message": f"Método no implementado: {tool_name}"}
+                    "error": {"code": -32601, "message": f"Method not implemented: {tool_name}"}
                 }
         
-        # Legacy methods (mantener para compatibilidad)
+        # Legacy methods (maintain for compatibility)
         elif method in ["extract_resources", "analyze_file", "list_supported_types", "batch_process", "get_statistics"]:
             if method == "extract_resources":
                 file_path = params.get("file_path")
@@ -619,7 +619,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "file_path es requerido"}
+                        "error": {"code": -32602, "message": "file_path is required"}
                     }
                 
                 result = await server.extract_resources(file_path, threshold_kb, output_dir)
@@ -631,7 +631,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "file_path es requerido"}
+                        "error": {"code": -32602, "message": "file_path is required"}
                     }
                 
                 result = await server.analyze_file(file_path)
@@ -648,7 +648,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "file_paths es requerido"}
+                        "error": {"code": -32602, "message": "file_paths is required"}
                     }
                 
                 result = await server.batch_process(file_paths, threshold_kb, output_base_dir)
@@ -660,7 +660,7 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                     return {
                         "jsonrpc": "2.0",
                         "id": request.get("id"),
-                        "error": {"code": -32602, "message": "metadata_file_path es requerido"}
+                        "error": {"code": -32602, "message": "metadata_file_path is required"}
                     }
                 
                 result = await server.get_statistics(metadata_file_path)
@@ -669,10 +669,10 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
             return {
                 "jsonrpc": "2.0",
                 "id": request.get("id"),
-                "error": {"code": -32601, "message": f"Método no encontrado: {method}"}
+                "error": {"code": -32601, "message": f"Method not found: {method}"}
             }
         
-        # Respuesta exitosa
+        # Successful response
         return {
             "jsonrpc": "2.0",
             "id": request.get("id"),
@@ -680,28 +680,28 @@ async def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logger.error(f"Error manejando request: {e}")
+        logger.error(f"Error handling request: {e}")
         return {
             "jsonrpc": "2.0",
             "id": request.get("id"),
-            "error": {"code": -32603, "message": f"Error interno: {str(e)}"}
+            "error": {"code": -32603, "message": f"Internal error: {str(e)}"}
         }
 
 
 async def main():
-    """Función principal del servidor MCP."""
-    parser = argparse.ArgumentParser(description='Servidor MCP para Gutenberg Resource Extractor')
-    parser.add_argument('--stdio', action='store_true', help='Usar stdio para comunicación')
-    parser.add_argument('--host', default='localhost', help='Host para servidor HTTP')
-    parser.add_argument('--port', type=int, default=8080, help='Puerto para servidor HTTP')
+    """Main MCP server function."""
+    parser = argparse.ArgumentParser(description='MCP server for Gutenberg Resource Extractor')
+    parser.add_argument('--stdio', action='store_true', help='Use stdio for communication')
+    parser.add_argument('--host', default='localhost', help='Host for HTTP server')
+    parser.add_argument('--port', type=int, default=8080, help='Port for HTTP server')
     
     args = parser.parse_args()
     
     if args.stdio:
-        # Modo stdio para MCP
-        logger.info("Iniciando servidor MCP en modo stdio")
+        # Stdio mode for MCP
+        logger.info("Starting MCP server in stdio mode")
         
-        # Crear reader para stdin
+        # Create reader for stdin
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
         await asyncio.get_event_loop().connect_read_pipe(lambda: protocol, sys.stdin)
@@ -709,12 +709,12 @@ async def main():
         try:
             while True:
                 try:
-                    # Leer línea completa de stdin
+                    # Read complete line from stdin
                     line = await reader.readline()
                     if not line:
                         break
                     
-                    # Decodificar y procesar request
+                    # Decode and process request
                     request_str = line.decode('utf-8').strip()
                     if not request_str:
                         continue
@@ -722,13 +722,13 @@ async def main():
                     request = json.loads(request_str)
                     response = await handle_request(request)
                     
-                    # Escribir response a stdout con flush
+                    # Write response to stdout with flush
                     response_str = json.dumps(response) + '\n'
                     sys.stdout.write(response_str)
                     sys.stdout.flush()
                     
                 except json.JSONDecodeError as e:
-                    logger.error(f"Error decodificando JSON: {e}")
+                    logger.error(f"Error decoding JSON: {e}")
                     error_response = {
                         "jsonrpc": "2.0",
                         "id": None,
@@ -737,10 +737,10 @@ async def main():
                     sys.stdout.write(json.dumps(error_response) + '\n')
                     sys.stdout.flush()
                 except KeyboardInterrupt:
-                    logger.info("Servidor detenido por usuario")
+                    logger.info("Server stopped by user")
                     break
                 except Exception as e:
-                    logger.error(f"Error en servidor: {e}")
+                    logger.error(f"Error in server: {e}")
                     error_response = {
                         "jsonrpc": "2.0",
                         "id": None,
@@ -750,16 +750,16 @@ async def main():
                     sys.stdout.flush()
                     
         except Exception as e:
-            logger.error(f"Error crítico en servidor stdio: {e}")
+            logger.error(f"Critical error in stdio server: {e}")
         finally:
-            logger.info("Servidor MCP stdio terminado")
+            logger.info("stdio MCP server terminated")
                 
     else:
-        # Modo HTTP para desarrollo/testing
-        logger.info(f"Iniciando servidor HTTP en {args.host}:{args.port}")
+        # HTTP mode for development/testing
+        logger.info(f"Starting HTTP server on {args.host}:{args.port}")
         
-        # Implementación HTTP simple (para desarrollo)
-        # En producción se usaría un framework web como FastAPI
+        # Simple HTTP implementation (for development)
+        # In production a web framework like FastAPI would be used
         import aiohttp
         
         async def handle_http_request(request):
@@ -771,7 +771,7 @@ async def main():
                 except Exception as e:
                     return aiohttp.web.json_response({
                         "jsonrpc": "2.0",
-                        "error": {"code": -32700, "message": f"Error parseando request: {str(e)}"}
+                        "error": {"code": -32700, "message": f"Error parsing request: {str(e)}"}
                     })
             else:
                 return aiohttp.web.Response(text="Gutenberg Extractor MCP Server")
@@ -786,12 +786,12 @@ async def main():
         site = aiohttp.web.TCPSite(runner, args.host, args.port)
         await site.start()
         
-        logger.info(f"Servidor MCP disponible en http://{args.host}:{args.port}")
+        logger.info(f"MCP server available at http://{args.host}:{args.port}")
         
         try:
-            await asyncio.Future()  # Ejecutar indefinidamente
+            await asyncio.Future()  # Run indefinitely
         except KeyboardInterrupt:
-            logger.info("Servidor detenido por usuario")
+            logger.info("Server stopped by user")
         finally:
             await runner.cleanup()
 
@@ -800,7 +800,7 @@ if __name__ == '__main__':
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.info("Servidor detenido")
+        logger.info("Server stopped")
     except Exception as e:
-        logger.error(f"Error ejecutando servidor: {e}")
+        logger.error(f"Error running server: {e}")
         sys.exit(1)

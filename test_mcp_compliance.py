@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script de prueba para validar el cumplimiento del protocolo MCP
-del servidor Gutenberg Extractor.
+Test script to validate MCP protocol compliance
+of the Gutenberg Extractor server.
 """
 
 import asyncio
@@ -12,22 +12,22 @@ import sys
 import time
 from pathlib import Path
 
-# Configuración de logging
+# Logging configuration
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
 class MCPComplianceTester:
-    """Tester para validar cumplimiento del protocolo MCP."""
+    """Tester to validate MCP protocol compliance."""
     
     def __init__(self):
         self.server_process = None
         
     async def start_server(self):
-        """Iniciar el servidor MCP en modo stdio."""
+        """Start the MCP server in stdio mode."""
         try:
-            logger.info("Iniciando servidor MCP...")
+            logger.info("Starting MCP server...")
             self.server_process = await asyncio.create_subprocess_exec(
                 sys.executable, 'mcp_server.py', '--stdio',
                 stdin=asyncio.subprocess.PIPE,
@@ -35,29 +35,29 @@ class MCPComplianceTester:
                 stderr=asyncio.subprocess.PIPE
             )
             
-            # Esperar un poco para que el servidor se inicie
+            # Wait a bit for the server to start
             await asyncio.sleep(1)
-            logger.info("Servidor MCP iniciado")
+            logger.info("MCP server started")
             
         except Exception as e:
-            logger.error(f"Error iniciando servidor: {e}")
+            logger.error(f"Error starting server: {e}")
             raise
     
     async def stop_server(self):
-        """Detener el servidor MCP."""
+        """Stop the MCP server."""
         if self.server_process:
             self.server_process.terminate()
             try:
                 await asyncio.wait_for(self.server_process.wait(), timeout=5)
             except asyncio.TimeoutError:
                 self.server_process.kill()
-            logger.info("Servidor MCP detenido")
+            logger.info("MCP server stopped")
     
     async def send_request(self, request: dict) -> dict:
-        """Enviar request al servidor y recibir respuesta."""
+        """Send request to server and receive response."""
         try:
             request_str = json.dumps(request) + '\n'
-            logger.info(f"Enviando request: {request['method']}")
+            logger.info(f"Sending request: {request['method']}")
             
             self.server_process.stdin.write(request_str.encode())
             await self.server_process.stdin.drain()
@@ -65,15 +65,15 @@ class MCPComplianceTester:
             response_line = await self.server_process.stdout.readline()
             response = json.loads(response_line.decode())
             
-            logger.info(f"Respuesta recibida: {response.get('result', {}).get('serverInfo', {}).get('name', 'unknown') if 'result' in response else 'error'}")
+            logger.info(f"Response received: {response.get('result', {}).get('serverInfo', {}).get('name', 'unknown') if 'result' in response else 'error'}")
             return response
             
         except Exception as e:
-            logger.error(f"Error enviando request: {e}")
+            logger.error(f"Error sending request: {e}")
             raise
     
     async def test_initialize(self) -> bool:
-        """Probar solicitud initialize."""
+        """Test initialize request."""
         request = {
             "jsonrpc": "2.0",
             "id": 1,
@@ -91,25 +91,25 @@ class MCPComplianceTester:
         try:
             response = await self.send_request(request)
             
-            # Validar respuesta
-            assert "result" in response, "Falta 'result' en respuesta"
-            assert "protocolVersion" in response["result"], "Falta 'protocolVersion' en respuesta"
-            assert "capabilities" in response["result"], "Falta 'capabilities' en respuesta"
-            assert "serverInfo" in response["result"], "Falta 'serverInfo' en respuesta"
+            # Validate response
+            assert "result" in response, "Missing 'result' in response"
+            assert "protocolVersion" in response["result"], "Missing 'protocolVersion' in response"
+            assert "capabilities" in response["result"], "Missing 'capabilities' in response"
+            assert "serverInfo" in response["result"], "Missing 'serverInfo' in response"
             
             server_info = response["result"]["serverInfo"]
-            assert server_info["name"] == "gutenberg-extractor", "Nombre del servidor incorrecto"
-            assert server_info["version"] == "2.0.0", "Versión del servidor incorrecta"
+            assert server_info["name"] == "gutenberg-extractor", "Incorrect server name"
+            assert server_info["version"] == "2.0.0", "Incorrect server version"
             
-            logger.info("✅ Test initialize PASSED")
+            logger.info("✅ Initialize test PASSED")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Test initialize FAILED: {e}")
+            logger.error(f"❌ Initialize test FAILED: {e}")
             return False
     
     async def test_tools_list(self) -> bool:
-        """Probar solicitud tools/list."""
+        """Test tools/list request."""
         request = {
             "jsonrpc": "2.0",
             "id": 2,
@@ -120,14 +120,14 @@ class MCPComplianceTester:
         try:
             response = await self.send_request(request)
             
-            # Validar respuesta
-            assert "result" in response, "Falta 'result' en respuesta"
-            assert "tools" in response["result"], "Falta 'tools' en respuesta"
+            # Validate response
+            assert "result" in response, "Missing 'result' in response"
+            assert "tools" in response["result"], "Missing 'tools' in response"
             
             tools = response["result"]["tools"]
-            assert len(tools) > 0, "No hay herramientas registradas"
+            assert len(tools) > 0, "No tools registered"
             
-            # Verificar que todas las herramientas tienen la estructura correcta
+            # Verify that all tools have the correct structure
             expected_tools = [
                 "extract_resources", "analyze_file", "batch_process", 
                 "get_statistics", "list_supported_types"
@@ -135,23 +135,23 @@ class MCPComplianceTester:
             
             actual_tools = [tool["name"] for tool in tools]
             for expected_tool in expected_tools:
-                assert expected_tool in actual_tools, f"Herramienta faltante: {expected_tool}"
+                assert expected_tool in actual_tools, f"Missing tool: {expected_tool}"
             
-            # Verificar estructura de herramientas
+            # Verify tool structure
             for tool in tools:
-                assert "name" in tool, f"Herramienta sin nombre: {tool}"
-                assert "description" in tool, f"Herramienta sin descripción: {tool['name']}"
-                assert "inputSchema" in tool, f"Herramienta sin schema: {tool['name']}"
+                assert "name" in tool, f"Tool without name: {tool}"
+                assert "description" in tool, f"Tool without description: {tool['name']}"
+                assert "inputSchema" in tool, f"Tool without schema: {tool['name']}"
             
-            logger.info(f"✅ Test tools/list PASSED - {len(tools)} herramientas encontradas")
+            logger.info(f"✅ Tools/list test PASSED - {len(tools)} tools found")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Test tools/list FAILED: {e}")
+            logger.error(f"❌ Tools/list test FAILED: {e}")
             return False
     
     async def test_tools_call(self) -> bool:
-        """Probar solicitud tools/call."""
+        """Test tools/call request."""
         request = {
             "jsonrpc": "2.0",
             "id": 3,
@@ -165,25 +165,25 @@ class MCPComplianceTester:
         try:
             response = await self.send_request(request)
             
-            # Validar respuesta
-            assert "result" in response, "Falta 'result' en respuesta"
-            assert "supported_types" in response["result"], "Falta 'supported_types' en respuesta"
+            # Validate response
+            assert "result" in response, "Missing 'result' in response"
+            assert "supported_types" in response["result"], "Missing 'supported_types' in response"
             
             supported_types = response["result"]["supported_types"]
             expected_types = ["svg", "png", "jpg", "webp", "gif"]
             
             for expected_type in expected_types:
-                assert expected_type in supported_types, f"Tipo de recurso faltante: {expected_type}"
+                assert expected_type in supported_types, f"Missing resource type: {expected_type}"
             
-            logger.info(f"✅ Test tools/call PASSED - {len(supported_types)} tipos soportados")
+            logger.info(f"✅ Tools/call test PASSED - {len(supported_types)} types supported")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Test tools/call FAILED: {e}")
+            logger.error(f"❌ Tools/call test FAILED: {e}")
             return False
     
     async def test_legacy_methods(self) -> bool:
-        """Probar métodos legacy para compatibilidad."""
+        """Test legacy methods for compatibility."""
         request = {
             "jsonrpc": "2.0",
             "id": 4,
@@ -194,19 +194,19 @@ class MCPComplianceTester:
         try:
             response = await self.send_request(request)
             
-            # Validar respuesta
-            assert "result" in response, "Falta 'result' en respuesta"
-            assert "supported_types" in response["result"], "Falta 'supported_types' en respuesta"
+            # Validate response
+            assert "result" in response, "Missing 'result' in response"
+            assert "supported_types" in response["result"], "Missing 'supported_types' in response"
             
-            logger.info("✅ Test legacy methods PASSED")
+            logger.info("✅ Legacy methods test PASSED")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Test legacy methods FAILED: {e}")
+            logger.error(f"❌ Legacy methods test FAILED: {e}")
             return False
     
     async def test_error_handling(self) -> bool:
-        """Probar manejo de errores."""
+        """Test error handling."""
         request = {
             "jsonrpc": "2.0",
             "id": 5,
@@ -220,28 +220,28 @@ class MCPComplianceTester:
         try:
             response = await self.send_request(request)
             
-            # Validar respuesta de error
-            assert "error" in response, "Falta 'error' en respuesta"
-            assert response["error"]["code"] == -32601, "Código de error incorrecto"
-            assert "Herramienta no encontrada" in response["error"]["message"], "Mensaje de error incorrecto"
+            # Validate error response
+            assert "error" in response, "Missing 'error' in response"
+            assert response["error"]["code"] == -32601, "Incorrect error code"
+            assert "Tool not found" in response["error"]["message"], "Incorrect error message"
             
-            logger.info("✅ Test error handling PASSED")
+            logger.info("✅ Error handling test PASSED")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Test error handling FAILED: {e}")
+            logger.error(f"❌ Error handling test FAILED: {e}")
             return False
     
     async def run_all_tests(self) -> dict:
-        """Ejecutar todos los tests."""
-        logger.info("Iniciando tests de cumplimiento del protocolo MCP")
+        """Run all tests."""
+        logger.info("Starting MCP protocol compliance tests")
         
         results = {}
         
         try:
             await self.start_server()
             
-            # Ejecutar tests
+            # Run tests
             results["initialize"] = await self.test_initialize()
             results["tools_list"] = await self.test_tools_list()
             results["tools_call"] = await self.test_tools_call()
@@ -249,18 +249,18 @@ class MCPComplianceTester:
             results["error_handling"] = await self.test_error_handling()
             
         except Exception as e:
-            logger.error(f"Error durante los tests: {e}")
+            logger.error(f"Error during tests: {e}")
             results["error"] = str(e)
             
         finally:
             await self.stop_server()
         
-        # Reporte final
+        # Final report
         total_tests = len([k for k in results.keys() if k != "error"])
         passed_tests = len([k for k in results.keys() if results.get(k, False) is True])
         
         logger.info("=" * 60)
-        logger.info("REPORTE FINAL DE TESTS")
+        logger.info("FINAL TEST REPORT")
         logger.info("=" * 60)
         
         for test_name, result in results.items():
@@ -270,27 +270,27 @@ class MCPComplianceTester:
             status = "✅ PASSED" if result else "❌ FAILED"
             logger.info(f"{test_name}: {status}")
         
-        logger.info(f"\nTotal: {passed_tests}/{total_tests} tests pasados")
+        logger.info(f"\nTotal: {passed_tests}/{total_tests} tests passed")
         
         if passed_tests == total_tests:
-            logger.info("🎉 Todos los tests han pasado! El servidor cumple con el protocolo MCP")
+            logger.info("🎉 All tests passed! The server complies with the MCP protocol")
         else:
-            logger.warning(f"⚠️  {total_tests - passed_tests} tests han fallado")
+            logger.warning(f"⚠️  {total_tests - passed_tests} tests failed")
         
         return results
 
 
 async def main():
-    """Función principal."""
+    """Main function."""
     tester = MCPComplianceTester()
     
-    # Cambiar al directorio del servidor
+    # Change to server directory
     script_dir = Path(__file__).parent
     os.chdir(script_dir)
     
     results = await tester.run_all_tests()
     
-    # Código de salida
+    # Exit code
     failed_tests = len([k for k, v in results.items() if k != "error" and v is False])
     sys.exit(failed_tests)
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Test Script para Gutenberg Extractor MCP Server
+Test Script for Gutenberg Extractor MCP Server
 ===============================================
 
-Script de prueba para verificar la funcionalidad del servidor MCP.
+Test script to verify MCP server functionality.
 
-Autor: Roo AI Agent
-Versión: 1.0.0
+Author: Roo AI Agent
+Version: 1.0.0
 """
 
 import asyncio
@@ -15,15 +15,15 @@ import sys
 import os
 from pathlib import Path
 
-# Añadir directorio actual al path
+# Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
 from mcp_server import handle_request
 
 
 async def test_mcp_server():
-    """Ejecutar pruebas del servidor MCP."""
-    print("🧪 Iniciando pruebas del servidor MCP Gutenberg Extractor")
+    """Run MCP server tests."""
+    print("🧪 Starting Gutenberg Extractor MCP Server Tests")
     print("=" * 60)
     
     tests = [
@@ -39,29 +39,29 @@ async def test_mcp_server():
     
     for test in tests:
         try:
-            print(f"\n📋 Ejecutando: {test.__name__}")
+            print(f"\n📋 Running: {test.__name__}")
             result = await test()
             if result:
-                print(f"✅ {test.__name__}: PASADO")
+                print(f"✅ {test.__name__}: PASSED")
                 passed += 1
             else:
-                print(f"❌ {test.__name__}: FALLIDO")
+                print(f"❌ {test.__name__}: FAILED")
         except Exception as e:
             print(f"💥 {test.__name__}: ERROR - {e}")
     
     print("\n" + "=" * 60)
-    print(f"📊 Resultados: {passed}/{total} pruebas pasadas")
+    print(f"📊 Results: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 ¡Todas las pruebas pasaron exitosamente!")
+        print("🎉 All tests passed successfully!")
         return True
     else:
-        print("⚠️  Algunas pruebas fallaron")
+        print("⚠️  Some tests failed")
         return False
 
 
 async def test_list_supported_types():
-    """Probar list_supported_types."""
+    """Test list_supported_types."""
     request = {
         "jsonrpc": "2.0",
         "id": 1,
@@ -71,7 +71,7 @@ async def test_list_supported_types():
     
     response = await handle_request(request)
     
-    # Verificar respuesta
+    # Verify response
     if "result" in response:
         result = response["result"]
         if result.get("success") and "supported_types" in result:
@@ -80,19 +80,19 @@ async def test_list_supported_types():
             
             for expected_type in expected_types:
                 if expected_type not in types:
-                    print(f"  ❌ Tipo faltante: {expected_type}")
+                    print(f"  ❌ Missing type: {expected_type}")
                     return False
             
-            print(f"  ✅ {len(types)} tipos soportados encontrados")
+            print(f"  ✅ {len(types)} supported types found")
             return True
     
-    print(f"  ❌ Respuesta inválida: {response}")
+    print(f"  ❌ Invalid response: {response}")
     return False
 
 
 async def test_analyze_file():
-    """Probar analyze_file con archivo de prueba."""
-    # Crear archivo de prueba temporal
+    """Test analyze_file with test file."""
+    # Create temporary test file
     test_content = '''
 <!-- wp:image {"id":123} -->
 <figure class="wp-block-image">
@@ -101,7 +101,7 @@ async def test_analyze_file():
 <!-- /wp:image -->
 '''
     
-    test_file = Path("test_gutenberg.template")
+    test_file = Path("test_gutenberg.gutemberg")
     test_file.write_text(test_content, encoding='utf-8')
     
     try:
@@ -121,24 +121,24 @@ async def test_analyze_file():
             if result.get("success") and "analysis" in result:
                 analysis = result["analysis"]
                 if analysis.get("total_data_uris", 0) > 0:
-                    print(f"  ✅ Detectado {analysis['total_data_uris']} data URIs")
+                    print(f"  ✅ Detected {analysis['total_data_uris']} data URIs")
                     return True
                 else:
-                    print(f"  ❌ No se detectaron data URIs")
+                    print(f"  ❌ No data URIs detected")
                     return False
         
-        print(f"  ❌ Respuesta inválida: {response}")
+        print(f"  ❌ Invalid response: {response}")
         return False
     
     finally:
-        # Limpiar archivo de prueba
+        # Clean up test file
         if test_file.exists():
             test_file.unlink()
 
 
 async def test_extract_resources():
-    """Probar extract_resources con archivo de prueba."""
-    # Crear archivo de prueba con data URI más grande
+    """Test extract_resources with test file."""
+    # Create test file with larger data URI
     test_svg = '''data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='red'/%3E%3C/svg%3E'''
     test_content = f'''
 <!-- wp:image {{"id":456}} -->
@@ -148,7 +148,7 @@ async def test_extract_resources():
 <!-- /wp:image -->
 '''
     
-    test_file = Path("test_gutenberg_extract.template")
+    test_file = Path("test_gutenberg_extract.gutemberg")
     test_file.write_text(test_content, encoding='utf-8')
     
     try:
@@ -168,21 +168,21 @@ async def test_extract_resources():
             result = response["result"]
             if result.get("success") and "results" in result:
                 results = result["results"]
-                print(f"  ✅ Procesamiento exitoso")
-                print(f"     Archivo original: {results.get('original_file', 'N/A')}")
-                print(f"     Recursos extraídos: {results.get('extracted_resources_count', 0)}")
-                print(f"     Reducción: {results.get('reduction_percentage', 0)}%")
+                print(f"  ✅ Processing successful")
+                print(f"     Original file: {results.get('original_file', 'N/A')}")
+                print(f"     Extracted resources: {results.get('extracted_resources_count', 0)}")
+                print(f"     Reduction: {results.get('reduction_percentage', 0)}%")
                 return True
         
-        print(f"  ❌ Respuesta inválida: {response}")
+        print(f"  ❌ Invalid response: {response}")
         return False
     
     finally:
-        # Limpiar archivos de prueba
+        # Clean up test files
         if test_file.exists():
             test_file.unlink()
         
-        # Limpiar directorio extraído si existe
+        # Clean up extracted directory if exists
         extracted_dir = Path("test_gutenberg_extract_extracted")
         if extracted_dir.exists():
             import shutil
@@ -190,8 +190,8 @@ async def test_extract_resources():
 
 
 async def test_batch_process():
-    """Probar batch_process con múltiples archivos."""
-    # Crear archivos de prueba
+    """Test batch_process with multiple files."""
+    # Create test files
     test_files = []
     test_content = '''
 <!-- wp:image {"id":789} -->
@@ -202,7 +202,7 @@ async def test_batch_process():
 '''
     
     for i in range(3):
-        test_file = Path(f"test_batch_{i}.template")
+        test_file = Path(f"test_batch_{i}.gutemberg")
         test_file.write_text(test_content, encoding='utf-8')
         test_files.append(str(test_file.absolute()))
     
@@ -223,23 +223,23 @@ async def test_batch_process():
             result = response["result"]
             if result.get("success") and "batch_summary" in result:
                 summary = result["batch_summary"]
-                print(f"  ✅ Procesamiento en lote exitoso")
-                print(f"     Archivos procesados: {summary.get('processed_successfully', 0)}")
-                print(f"     Recursos totales extraídos: {summary.get('total_extracted_resources', 0)}")
-                print(f"     Reducción general: {summary.get('overall_reduction_percentage', 0)}%")
+                print(f"  ✅ Batch processing successful")
+                print(f"     Files processed: {summary.get('processed_successfully', 0)}")
+                print(f"     Total extracted resources: {summary.get('total_extracted_resources', 0)}")
+                print(f"     Overall reduction: {summary.get('overall_reduction_percentage', 0)}%")
                 return True
         
-        print(f"  ❌ Respuesta inválida: {response}")
+        print(f"  ❌ Invalid response: {response}")
         return False
     
     finally:
-        # Limpiar archivos de prueba
+        # Clean up test files
         for test_file_path in test_files:
             test_file = Path(test_file_path)
             if test_file.exists():
                 test_file.unlink()
         
-        # Limpiar directorios extraídos si existen
+        # Clean up extracted directories if they exist
         for i in range(3):
             extracted_dir = Path(f"test_batch_{i}_batch")
             if extracted_dir.exists():
@@ -248,8 +248,8 @@ async def test_batch_process():
 
 
 async def test_get_statistics():
-    """Probar get_statistics."""
-    # Crear archivo de metadatos de prueba
+    """Test get_statistics."""
+    # Create test metadata file
     test_metadata = {
         "original_file": "/test/original.template",
         "statistics": {
@@ -287,16 +287,16 @@ async def test_get_statistics():
             result = response["result"]
             if result.get("success") and "statistics" in result:
                 statistics = result["statistics"]
-                print(f"  ✅ Estadísticas obtenidas exitosamente")
-                print(f"     Tipos de recursos analizados: {len(statistics.get('resource_type_analysis', {}))}")
-                print(f"     Métricas de eficiencia disponibles: {len(statistics.get('efficiency_metrics', {}))}")
+                print(f"  ✅ Statistics obtained successfully")
+                print(f"     Resource types analyzed: {len(statistics.get('resource_type_analysis', {}))}")
+                print(f"     Efficiency metrics available: {len(statistics.get('efficiency_metrics', {}))}")
                 return True
         
-        print(f"  ❌ Respuesta inválida: {response}")
+        print(f"  ❌ Invalid response: {response}")
         return False
     
     finally:
-        # Limpiar archivo de metadatos de prueba
+        # Clean up test metadata file
         if metadata_file.exists():
             metadata_file.unlink()
 
@@ -306,8 +306,8 @@ if __name__ == "__main__":
         success = asyncio.run(test_mcp_server())
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
-        print("\n\n⏹️  Pruebas interrumpidas por el usuario")
+        print("\n\n⏹️  Tests interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n\n💥 Error ejecutando pruebas: {e}")
+        print(f"\n\n💥 Error running tests: {e}")
         sys.exit(1)

@@ -1,48 +1,48 @@
 #!/bin/bash
-# Setup script para el servidor MCP de Gutenberg Resource Extractor v2.0.0
-# Cumplimiento completo del protocolo MCP
+# Setup script for Gutenberg Resource Extractor MCP Server v2.0.0
+# Full MCP protocol compliance
 
-echo "🚀 Configurando Gutenberg Extractor MCP Server v2.0.0"
+echo "🚀 Configuring Gutenberg Extractor MCP Server v2.0.0"
 echo "====================================================="
 
-# Verificar Python 3
+# Check Python 3
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Error: Python 3 no está instalado"
+    echo "❌ Error: Python 3 is not installed"
     exit 1
 fi
 
-echo "✅ Python 3 encontrado: $(python3 --version)"
+echo "✅ Python 3 found: $(python3 --version)"
 
-# Crear entorno virtual (opcional)
+# Create virtual environment (optional)
 VENV_DIR="venv"
 if [ "$1" = "--venv" ]; then
-    echo "🔧 Creando entorno virtual..."
+    echo "🔧 Creating virtual environment..."
     python3 -m venv "$VENV_DIR"
     source "$VENV_DIR/bin/activate"
-    echo "✅ Entorno virtual activado"
+    echo "✅ Virtual environment activated"
 fi
 
-# Instalar dependencias
-echo "📦 Instalando dependencias..."
-pip3 install aiohttp 2>/dev/null || echo "⚠️ aiohttp ya está instalado o no disponible"
+# Install dependencies
+echo "📦 Installing dependencies..."
+pip3 install aiohttp 2>/dev/null || echo "⚠️ aiohttp is already installed or not available"
 
-# Hacer ejecutables los scripts
+# Make scripts executable
 chmod +x gutenberg_extractor.py
 chmod +x mcp_server.py
 chmod +x test_mcp_compliance.py
 chmod +x example_usage.sh
 
 echo ""
-echo "✅ Configuración completada!"
+echo "✅ Configuration completed!"
 echo ""
-echo "📋 Comandos disponibles:"
-echo "  • python3 gutenberg_extractor.py archivo.template"
+echo "📋 Available commands:"
+echo "  • python3 gutenberg_extractor.py file.template"
 echo "  • python3 mcp_server.py --stdio"
-echo "  • python3 test_mcp_compliance.py (pruebas de cumplimiento MCP)"
+echo "  • python3 test_mcp_compliance.py (MCP compliance tests)"
 echo "  • ./example_usage.sh"
 echo ""
-echo "🔧 Configuración MCP:"
-echo "  1. Agregar a tu configuración MCP settings:"
+echo "🔧 MCP Configuration:"
+echo "  1. Add to your MCP settings configuration:"
 echo ""
 echo '  {'
 echo '    "mcpServers": {'
@@ -54,12 +54,12 @@ echo '      }'
 echo '    }'
 echo '  }'
 echo ""
-echo "🧪 Validar cumplimiento MCP:"
+echo "🧪 Validate MCP compliance:"
 echo "  python3 test_mcp_compliance.py"
 echo ""
-echo "📚 Herramientas disponibles:"
-echo "  • extract_resources: Extraer recursos embebidos"
-echo "  • analyze_file: Analizar archivo sin procesar"
-echo "  • batch_process: Procesar múltiples archivos"
-echo "  • get_statistics: Obtener estadísticas detalladas"
-echo "  • list_supported_types: Listar tipos soportados"
+echo "📚 Available tools:"
+echo "  • extract_resources: Extract embedded resources"
+echo "  • analyze_file: Analyze file without processing"
+echo "  • batch_process: Process multiple files"
+echo "  • get_statistics: Get detailed statistics"
+echo "  • list_supported_types: List supported types"
